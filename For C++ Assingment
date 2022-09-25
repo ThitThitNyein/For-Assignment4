@@ -1,0 +1,254 @@
+//***************************************************************
+//                   For C++Assignment
+//****************************************************************
+
+#include<iostream>
+#include<fstream>
+#include<cctype>
+#include<iomanip>
+using namespace std;
+
+class Personal
+{
+	int pno;
+	char name[50];
+	int income;
+	char type;
+public:
+	void create_account();
+	void show_account() const;
+	void modify();
+	int retincome();	
+	int retpno() const;
+	char rettype();
+};        
+
+void Personal::create_account()
+{
+	cout<<"\nEnter The Personal No. :";
+	cin>>pno;
+	cout<<"\n\nEnter The Name of The account Holder : ";
+	cin.ignore();
+	cin.getline(name,50);
+	cout<<"\nEnter Type of The person (W/P) : ";
+	cin>>type;
+	type=toupper(type);
+	cout<<"\nEnter The Income amount(>=$5000 for  W  and >=$1000 for P ) : ";
+	cin>>income;
+	cout<<"\n\n\nAccount Created..";
+}
+
+void Personal::show_account() const
+{
+	cout<<"\nPERSONAL No. : "<<pno;
+	cout<<"\nName : ";
+	cout<<name;
+	cout<<"\nType of Sex : "<<type;
+	cout<<"\nIncome amount : "<<income;
+}
+
+
+void Personal::modify()
+{
+	cout<<"\nPERSONAL No. : "<<pno;
+	cout<<"\nModify Name : ";
+	cin.ignore();
+	cin.getline(name,50);
+	cout<<"\nModify Type of Sex : ";
+	cin>>type;
+	type=toupper(type);
+	cout<<"\nModify INCOME amount : ";
+	cin>>income;
+}
+
+
+int Personal::retpno() const
+{
+	return pno;
+}
+
+int Personal::retincome()
+{
+    return income;
+	cout<<pno<<setw(10)<<" "<<name<<setw(10)<<" "<<type<<setw(6)<<income<<endl;
+}
+
+
+char Personal::rettype()
+{
+	return type;
+}
+
+
+void write_data();	
+void income_amount(int);
+void modify_data(int);
+void delete_record(int);
+void display_all();	
+void intro();
+
+int main()
+{
+	char ch;
+	int num;
+	intro();
+	do
+	{
+		system("cls");
+		cout<<"\n\n\n\tSURVEY DATA CREATION";
+		cout<<"\n\n\t01. NEW PERSON";
+		cout<<"\n\n\t02. INCOME AMOUNT";
+		cout<<"\n\n\t03. ALL PERSON_DATA LIST";
+		cout<<"\n\n\t04. DELETE_RECORD";
+		cout<<"\n\n\t05. MODIFY DATA";
+		cout<<"\n\n\t06. EXIT";
+		cout<<"\n\n\tSelect Your Option (0-6) ";
+		cin>>ch;
+		system("cls");
+		switch(ch)
+		{
+		case '1':
+			write_data();
+			break;
+		case '2':
+			cout<<"\n\n\tEnter The PERSONAL No. : "; cin>>num;
+			income_amount(num);
+			break;
+		case '3':
+			display_all();
+			break;
+		case '4':
+			cout<<"\n\n\tEnter The PERSONAL No. : "; cin>>num;
+			delete_record(num);
+			break;
+		 case '5':
+			cout<<"\n\n\tEnter The PERSONAL No. : "; cin>>num;
+			modify_data(num);
+			break;
+		 case '6':
+			cout<<"\n\n\tThanks";
+			break;
+		 default :cout<<"\a";
+	   }
+		cin.ignore();
+		cin.get();
+    }while(ch!='6');
+	return 0;
+}
+
+void write_data()
+{
+	Personal pl;
+	ofstream outFile;
+	outFile.open("account.dat",ios::binary|ios::app);
+	pl.create_account();
+	outFile.write(reinterpret_cast<char *> (&pl), sizeof(Personal));
+	outFile.close();
+}
+
+void income_amount()
+{
+    int bal;
+    Personal pl;
+	ofstream outFile;
+	outFile.open("account.txt,ios::binary|ios::app");
+	
+    cout<<"\n\n\t INCOME DATA";
+    cout<<"\n\nEnter The Amount of INCOME : ";
+    cin>>bal;
+    cout<<"\n Enter Type";
+    int income = pl.retincome();
+    if(bal<5000)
+        cout<<"Don't need to support";
+    else(bal>2000);
+        cout<<"Need to support";
+        outFile.write(reinterpret_cast<char *> (&pl), sizeof(Personal));
+	outFile.close();
+    
+}
+
+void modify_data(int n)
+{
+	bool found=false;
+	Personal pl;
+	fstream File;
+	File.open("account.txt",ios::binary|ios::in|ios::out);
+	if(!File)
+	{
+		cout<<"File could not be open !! Press any Key...";
+		return;
+	}
+	while(!File.eof() && found==false)
+	{
+		File.read(reinterpret_cast<char *> (&pl), sizeof(Personal));
+		if(pl.retpno()==n)
+		{
+			pl.show_account();
+			cout<<"\n\nEnter The New Details of account"<<endl;
+			pl.modify();
+			int pos=(-1)*static_cast<int>(sizeof(Personal));
+			File.seekp(pos,ios::cur);
+			File.write(reinterpret_cast<char *> (&pl), sizeof(Personal));
+			cout<<"\n\n\t Record Updated";
+			found=true;
+		  }
+	}
+	File.close();
+	if(found==false)
+		cout<<"\n\n Record Not Found ";
+}
+
+void delete_data(int n)
+{
+	Personal pl;
+	ifstream inFile;
+	ofstream outFile;
+	inFile.open("account.txt",ios::binary);
+	if(!inFile)
+	{
+		cout<<"File could not be open !! Press any Key...";
+		return;
+	}
+	outFile.open("Temp.txt",ios::binary);
+	inFile.seekg(0,ios::beg);
+	while(inFile.read(reinterpret_cast<char *> (&pl), sizeof(Personal)))
+	{
+		if(pl.retpno()!=n)
+		{
+			outFile.write(reinterpret_cast<char *> (&pl), sizeof(Personal));
+		}
+	}
+	inFile.close();
+	outFile.close();
+	remove("account.txt");
+	rename("Temp.txt","account.txt");
+	cout<<"\n\n\tRecord Deleted ..";
+}
+
+void display_all()
+{
+	Personal pl;
+	ifstream inFile;
+	inFile.open("account.txt",ios::binary);
+	if(!inFile)
+	{
+		cout<<"File could not be open !! Press any Key...";
+		return;
+	}
+	cout<<"\n\n\t\tPERSONAL DATA LIST\n\n";
+	cout<<"====================================================\n";
+	cout<<"P no.      NAME \t          Sex_Type  \tIncome \n";
+	cout<<"====================================================\n";
+	while(inFile.read(reinterpret_cast<char *> (&pl), sizeof(Personal)))
+	{
+		pl.retincome();
+	}
+	inFile.close();
+}
+
+void intro()
+{
+	cout<<"\n\n\n\nMADE BY : your name";
+	cout<<"\n\nTOWNSHIP : your TOWNSHIP name";
+	cin.get();
+}
